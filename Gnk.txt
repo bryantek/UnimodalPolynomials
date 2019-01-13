@@ -1,0 +1,1124 @@
+#######################################################################
+## Research: Save this file as Gnk.txt. To use it, stay in the        #
+## same directory, get into Maple (by typing: maple <Enter> )         #
+## and then type:  read "Gnk.txt"; <Enter>                            #
+## Then follow the instructions given there                           #
+##                                                                    #
+## Written by Bryan Ek, Rutgers University,                           #
+##  bryan.t.ek@math.rutgers.edu.                                      # 
+#######################################################################
+
+print(`This is Gnk`):
+print(`by Bryan Ek, advisee to Dr. Zeilberger, Rutgers University.`):
+print(``):
+print(`If you have comments or notice any errors, please email`):
+print(`bryan [dot] t [dot] ek [at] math [dot] rutgers [dot] edu`):
+print(`bryan.t.ek@math.rutgers.edu`):
+print(``):
+print(`The latest version (11/30/2017) of this package is available from`):
+print(`http://www.math.rutgers.edu/~bte14/Code/Gnk/Gnk.txt`):
+print(`or`):
+print(`https://github.com/bryantek/UnimodalPolynomials/`):
+print(``):
+print(`This package is about generalizing the arguments of O'Hara and Zeilberger that the q-binomials [n+k,k]_q are symmetric and unimodal for fixed n,k.`):
+print(`By modifying the recurrence, we can create many more families of symmetric and unimodal polynomials.`):
+print(``):
+print(`For a list of functions this package provides type Help().`):
+print(`The most important function is KOHgeneral(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1).`):
+print(`For a list of functions taken (with permission) from qFindRec.txt and GuessPq.txt, type ezra().`):
+print(`These latter functions where used for pattern recognition.`):
+print(``):
+
+with(combinat):
+
+Help:=proc():
+	if args=`isSymmetric` then
+		print(`isSymmetric(p,q): inputs a polynomial in q. Checks whether it is symmetric (in coefficients).`):
+		print(`isSymmetric(q^5+2*q^4+2*q^3+q^2+q,q)=true. isSymmetric(q^6+2*q^5+q^4+2*q^3+q^2+2*q,q)=false.`):
+	elif args=`isUnimodal` then
+		print(`isUnimodal(p,q): inputs a polynomial in q. Checks whether it is unimodal (in coefficients).`):
+		print(`isUnimodal(q^6+q^5+q^4+2*q^3+q^2+q,q)=true. isUnimodal(q^6+2*q^5+q^4+2*q^3+q^2+2*q+1,q)=false.`):
+	elif args=`isSymUni` then
+		print(`isSymUni(p,q): inputs a polynomial. Checks whether p is symmetric and unimodal.`):
+		print(`Is faster than independently checking isSymmetric(p,q) and isUnimodal(p,q).`):
+		print(`isSymUni(2*q^6+q^5+q^4+2*q^3+q^2+q+2,q)=false. isSymUni(q^6+2*q^5+3*q^4+2*q^3+2*q^2+2*q,q)=false. isSymUni(2*q^5+2*q^4+7*q^3+2*q^2+2*q,q)=true.`):
+	elif args=`lMon` then
+		print(`lMon(P):  Outputs the monomials of highest degree in P. As a set.`):
+		print(`Try lMon(x^2*y^2+x^3+y^4).`):
+	elif args=`generalPartitions` then
+		print(`generalPartitions(n,minPart:=1,maxPart:=n,minSize:=0,maxSize:=n,minDistance:=0,congruences:={}): finds all of the partitions of n.`):
+		print(`Subject to the constraints that each part is >=minPart and <=maxPart.`):
+		print(`The size of the partition is >=minSize and <=maxSize.`):
+		print(`Consecutive parts must have difference >=minDistance.`):
+		print(`congruences is a set of 2-element lists [a,b]. Each part must be =a mod b for some pair in congruences.`):
+		print(`If congruences={}, then any number (subject to the other constraints) is valid.`):
+		print(`To obtain all partitions, call generalPartitions(n,1,n,1,n,0,{}) or generalPartitions(n).`):
+	elif args=`genPartitions` then
+		print(`genPartitions(n,validNumbers,minS,maxS,minD): finds all partitions of n.`):
+		print(`Subject to each part being in validNumbers, minS<=size<=maxS and consecutive parts differing by >=minD.`):
+		print(`Assumed that n>= all members of validNumbers.`):
+	elif args=`Gnk` then
+		print(`Gnk(n,k,q): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k). n OR k can be symbolic.`):
+		print(`Try Gnk(5,3,q) and Gnk(6,k,q).`):
+	elif args=`KOH` then
+		print(`KOH(n,k,q): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k).`):
+		print(`Uses the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(`Try KOH(5,3,q).`):
+	elif args=`KOHa` then
+		print(`KOHa(n,k,q,a): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k). There is also symbolic a[partition] in the result.`):
+		print(`Uses the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(`Try KOHa(5,3,q,a).`):
+	elif args=`KOHrand` then
+		print(`KOHrand(n,k,q,N): Produces a "random" symmetric and unimodal polynomial of darga n*k.`):
+		print(`n,k are integers and q is a variable.`):
+		print(`Uses the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(`Each recurrence is multiplied by rand(0..N). Equivalent to assigning random values to a in KOHa(n,k,q,a).`):
+		print(`Try KOHrand(6,4,q,4).`):
+	elif args=`RandomTheorem` then
+		print(`RandomTheorem(n,q,K,L:=1,l:=1,complicated:=false): Produces a list of symmetric and unimodal polynomials in q with parameter n by adjusting the recursive call of KOH.`):
+		print(`n,q are variables. K is the number of polynomials you wish to produce.`):
+		print(`L,l are upper and lower bounds respectively used as coefficients in the recursive call. They are the randomness.`):
+		print(`You can further complicate the polynomials by setting complicated=true. This requires solving a recurrence relation which may introduce imaginary coefficients, though it should simplify to a polynomial for all integer n.`):
+		print(`This is similar in process to KOHrand but produces polynomials in q with parameter n as opposed to a single fixed polynomial.`):
+		print(`RandomTheorem(n,q,K) will exactly reproduce the first K q-binomials.`):
+		print(`Try RandomTheorem(n,q,5,7).`):
+	elif args=`RandomTheoremAndProof` then
+		print(`RandomTheoremAndProof(n,q,K,L:=1,l:=1,complicated:=false): Performs the same function as RandomTheorem`):
+		print(`but also supplies a proof in the form of an equation for each polynomial.`):
+		print(`Then simply use the observations of darga (and induction if complicated=true) to finish the proof.`):
+		print(`The polynomial and proof are pretty printed on separate lines as well as linearly printed.`):
+		print(`The first polynomial will always be a multiple of (1-q^(n+1))/(1-q) with proof =Sum(q^i,i=0..n).`):
+		print(`Try RandomTheoremAndProof(n,q,4,8,0)`):
+	elif args=`KOHdepth` then
+		print(`KOHdepth(n,k): Finds the maximum depth of recursive calls using the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(`Is equivalent to finding degree(coeff(KOHa(n,k,q,a),q,floor(n*k/2))), but much faster.`):
+		print(`Try KOHdepth(20,20).`):
+	elif args=`KOHdepthFAST` then
+		print(`KOHdepthFAST(n,k): finds the maximum depth of recursive calls using the explicit formula found in the accompanying paper.`):
+		print(`Try KOHdepthFAST(20,20).`):
+	elif args=`KOHcalls` then
+		print(`KOHcalls(n,k): Finds the total number of recursive calls using the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(`Try KOHcalls(20,20).`):
+	elif args=`KOHgeneral` then
+		print(`KOHgeneral(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1): Produces symmetric and unimodal polynomials.`):
+		print(`Uses a modified version of the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.`):
+		print(``):
+		print(`n,k are nonnegative integers. q is a variable.`):
+		print(`PP=Partition Parameters:`):
+		print(`pp1=integer: restricts to partitions with minimum integer >=pp1. pp1 should be in [1,k].`):
+		print(`pp2=integer: restricts to partitions with maximum integer <=pp2. pp2 should be in [1,k].`):
+		print(`pp3=integer: restricts to partitions with minimum size >=pp3. pp3 should be in [0,k].`):
+		print(`pp4=integer: restricts to partitions with maximum size <=pp4. pp4 should be in [1,k].`):
+		print(`pp5=integer: restricts to partitions with parts at least distance >=pp5.`):
+		print(`pp6=set: elements are pairs [a,b] such that each part of a partition is =a mod b for some [a,b] in pp6.`):
+		print(`RP=Recursive Parameters: rp1,rp2,rp3 should be >=0.`):
+		print(`Multiplies each addition by a certain factor of q and modifies the recursed KOHgeneral s.t. we maintain darga(KOHgeneral(n,k,q,parameters))=n*k.`):
+		print(`rp1: Multiply by q^(k*rp1) and reduce n in KOHgeneral by 2*rp1*(k-i). I.e. call KOHgeneral("-2*rp1*(k-i),") instead of KOHgeneral(",").`):
+		print(`rp2: Multiply by q^(nops(part)*rp2) and reduce n in KOHgeneral by 2*rp2. I.e. call KOHgeneral("-2*rp2,") instead of KOHgeneral(",").`):
+		print(`rp3: Multiply by q^(rp3*(k*(k+1)*(n/2-rp1)-k*(k+2*rp2)+add(d[i]*i^2,i=1..k))) and reduce k in KOHgeneral by 2*rp3. I.e. KOHgeneral(","-2*rp3) instead of KOH general(",").`):
+		print(`If rp3<0, then KOHgeneral=0. If rp3>0 then we get infinite recursion.`):
+		print(`CP=Constant Parameters:`):
+		print(`cp1: Multiplies initial conditions by cp1. Makes more than a multiplicative difference because the recursive calls can compound differently.`):
+		print(`cp2: Multiplies KOH by cp2. Makes more than a multiplicative difference because the recursive calls can compound differently.`):
+		print(`cp1,cp2 appear to dictate the peak difference. After dividing out by cp1^k*cp2, the difference is? cp1*cp2. Need sign(cp1)=sign(cp2) otherwise the peak is actually a valley.`):
+		print(`cp3 is an expression in the variable cp4. It multiples each addition by subs(cp4=nops(partition),cp3).`):
+		print(`RT: a table of values indexed by partitions that multiplies each summand by RT[partition].`):
+		print(`If RT does not have partition as an index, it is treated as RT[partition]=1.`):
+		print(``):
+		print(`Try KOHgeneral(8,4,q,[1,3,1,2,0,{}],[1,1,0],[2,3,i,i],1).`):
+	elif args=`KOHgeneralParsed` then
+		print(`KOHgeneralParsed(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,ijk],RT:=1): Calls KOHgeneral(n,k,q,pParams,rParams,cParams) where PP,RP,CP have been parsed.`):
+		print(`Is very forgiving in what parameters are fed into it. Will fill the parameters with identity components.`):
+		print(`PP,RP,CP should be a list or a non-negative integer.`):
+		print(`Also divides out by constants.`):
+		print(`Try KOHgeneral(8,4,q,[1,3,1,2],[1,1],[2,3,i,i],1).`):
+	elif args=`KOHrecurse` then
+		print(`KOHrecurse(GNK,n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1): Returns what the recursive call would be for KOHgeneral(n,k,q,PP,RP,CP,RT).`):
+		print(`Uses GNK as a placeholder for the recursive call.`):
+		print(`Try KOHrecurse(GNK,8,4,q,[1,3,1,2],[1,1],[2,3,i,i],1).`):
+	elif args=`Gs` then
+		print(`Gs(s,n,k,q): Finds the polynomial for KOH restricted to partitions of size <=s using a conjectured recurrence.`):
+		print(`It has been verified for s=1,2 using G1,G2.`):
+		print(`This can only enumerate by itself for n<s. For n>=s, it will eventually call KOHgeneral.`):
+		print(`Try Gs(5,3,9,q).`):
+	elif args=`G1` then
+		print(`G1(n,k,q): Explicit formula for Gs(1,n,k,q): KOH restricted to partitions of size 1.`):
+		print(`Try G1(6,8,q).`):
+	elif args=`G2` then
+		print(`G2(n,k,q): Explicit formula for Gs(2,n,k,q): KOH restricted to partitions of size <=2.`):
+		print(`Try G2(6,8,q)`):
+	elif args=`G3` then
+		print(`G3(n,k,q): Explicit formula for Gs(3,n,k,q): KOH restricted to partitions of size <=3.`):
+		print(`Try G3(6,8,q)`):
+	else
+		print(`Useable functions:`):
+		print(`isSymmetric, isUnimodal, isSymUni, lMon, generalPartitions, genPartitions, Gnk, KOH, KOHa, KOHrand, KOHdepth, KOHdepthFAST, KOHcalls, KOHgeneral, KOHgeneralParsed, KOHrecurse, RandomTheorem, RandomTheoremAndProof, Gs, G1, G2, G3`):
+		print(`KOHgeneral is the most important function which allows creation of many symmetric and unimodal polynomials.`):
+		print(`To create "random" symmetric and unimodal polynomials use KOHrand.`):
+		print(`For families of polynomials, use RandomTheorem and for accompanying proofs use RandomTheoremAndProof.`):
+		print(`For help with a specific function, type Help(function).`):
+	fi:
+end:
+
+###################################################
+#isSymmetric(p,q): inputs a polynomial in q. Checks whether p is symmetric (in coefficients).
+#isSymmetric(q^5+2*q^4+2*q^3+q^2+q,q)=true. isSymmetric(q^6+2*q^5+q^4+2*q^3+q^2+2*q,q)=false.
+isSymmetric:=proc(p,q) local d,lDeg,Deg:
+#	evalb(simplify(p-subs(q=q^(-1),p)*q^(degree(p,q)+ldegree(p,q)))=0):
+#Not sure which is faster. Simple testing yields the second is faster. And is certainly faster if p is NOT symmetric (since it terminates earlier).
+	lDeg:=ldegree(p,q):
+	Deg:=degree(p,q)+lDeg:
+	for d from lDeg to floor((Deg-1)/2) do
+		if coeff(p,q,d)<>coeff(p,q,Deg-d) then
+			return(false):
+		fi:
+	od:
+	true:
+end:
+###################################################
+#isUnimodal(p,q): inputs a polynomial in q. Checks whether p is unimodal (in coefficients).
+#isUnimodal(q^6+q^5+q^4+2*q^3+q^2+q,q)=true. isUnimodal(q^6+2*q^5+q^4+2*q^3+q^2+2*q+1,q)=false.
+isUnimodal:=proc(p,q) local stillRising,d:
+	stillRising:=true:
+	for d from ldegree(p,q) to degree(p,q)-1 do
+		if stillRising then
+			if coeff(p,q,d)>coeff(p,q,d+1) then
+				stillRising:=false:
+			fi:
+		else
+			if coeff(p,q,d)<coeff(p,q,d+1) then
+				return(false):
+			fi:
+		fi:
+	od:
+	true:
+end:
+###################################################
+#isSymUni(p,q): inputs a polynomial. Checks whether p is symmetric and unimodal.
+isSymUni:=proc(p,q) local lDeg,Deg,d:
+	lDeg:=ldegree(p,q):
+	Deg:=degree(p,q)+lDeg:
+	for d from lDeg to floor((Deg-1)/2) do
+		if coeff(p,q,d)<>coeff(p,q,Deg-d) or coeff(p,q,d)>coeff(p,q,d+1) then
+			return(false):
+		fi:
+	od:
+	true:
+end:
+
+###################################################
+#lMon(P): Outputs the monomials of highest degree in P as a set.
+lMon:=proc(P) local S,T,d,s:
+	S:=convert(P,set):
+	T:={}:
+	d:=degree(P):
+	for s in S do
+		if degree(s)=d then
+			T:=T union {s}:
+		fi:
+	od:
+	T:
+end:
+
+
+##################################################################################################################
+#Gs(s,n,k,q): Finds the polynomial for KOH restricted to partitions of size <=s using a conjectured recurrence.
+#It has been verified for s=1,2,3 using G1,G2,G3.
+#Can only enumerate for n<s.
+Gs:=proc(s,n,k,q) option remember:
+	if n=0 or k=0 then
+		1:
+	elif n=k+s-1 then
+		KOHgeneral(n,k,q,[1,k,1,s,0,{}]):
+	else
+		expand(normal((q^(n)*(q^(k-1+s)-1)*Gs(s,n,k-1,q)-q^k*(q^(n)-q^(s-1))*Gs(s,n-1,k,q))/(q^(k+s-1)-q^(n)))):
+	fi:
+end:
+##################################################################################################################
+#G1(n,k,q): Explicit formula for Gs(1,n,k,q):
+G1:=proc(n,k,q):
+	expand(normal((1-q^(n*k+1))/(1-q))):
+end:
+##################################################################################################################
+#G2(n,k,q): Explicit formula for Gs(2,n,k,q):
+G2:=proc(n,k,q):
+	if n=0 then
+		return(1):
+	fi:	expand(normal((1-q^(n*k+1))/(1-q)+q^2*(1+q^(n*k-k+1))*(1-q^(k-1))/((1-q)^3*(1+q))-q^(n+1)*(1-q^(n*(k-1)))/((1-q)^2*(1-q^n)))):
+end:
+##################################################################################################################
+#G3(n,k,q): Explicit formula for Gs(3,n,k,q):
+G3:=proc(n,k,q):
+	if n<2 then
+		return(G2(n,k,q)):
+	fi:	expand(normal((q^(2*k)*(q^(2*n)*(1-q^(k+1))*(1-q^(k+2))-q^n*(1+q)*(1-q^(k+2))*(1-q+q^4-q^(k+1))+q^(2*k+4)-q^(k+7)-q^(k+6)+q^(k+4)-q^(k+2)+q^9-q^7+q^5+q^4-q^3-q^2+q)-q^(n*k)*(q^(2*n)*(q^(2*k)*(q^9-q^8-q^7+q^6+q^5-q^3+q)-q^k*(q^8-q^6+q^4+q^3)+q^6)-q^n*q^3*(1+q)*(1-q^(k+2))*(-q^(k+4)+q^(k+3)-q^k+q^3)+q^7*(1-q^(k+1))*(1-q^(k+2))))/((1-q)^2*(1-q^2)^2*(1-q^3)*(1-q^(n-1))*(1-q^n)*q^(2*k+1)))):
+#Alternate (equivalent) formulation:
+#	expand(normal((q^(4*k)*q^3*(1-q^n)*( q-q^n)-q^(3*k)*q*(1+q)*( 1-q^n)*(q-q^2+q^5-q^n)-q^(2*k)*(q^(n*k)*(q^(2*n)*(q^9-q^8-q^7+q^6+ q^5-q^3+q)-q^n*(q^(10)-q^8+q^6+q^5)+q^(10))-q^(2*n)+q^n*(q^5+q^4-q^2+1)-q^9+q^7-q^5-q^4+q^3+q^2-q)+q^k* q^(n*k)*q^3*(1+q)* ( 1-q^n)  *( q^5-q^n+q^(n+3)-q^(n+4))-q^(n*k)*q^6 *( 1-q^n) *( q-q^n))/((1-q)^2*(-q^2+1)^2*(-q^3+1)*(1-q^(n-1))*(1-q^n)*q^(2*k+1)))):
+end:
+
+##################################################################################################################
+#Gnk(n,k,q): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k). n OR k can be symbolic.
+Gnk:=proc(n,k,q):
+	if (is(k,integer) and k<0) or (is(n,integer) and n<0) then
+		0:
+	elif is(k,integer) then
+		if is(n,integer) then
+			expand(normal(mul((1-q^(n+i))/(1-q^i),i=1..k))):
+		else
+			mul((1-q^(n+i))/(1-q^i),i=1..k):
+		fi:
+	elif is(n,integer) then
+		mul((1-q^(k+i))/(1-q^i),i=1..n):
+	else
+		QBINOMIAL(n+k,k):
+	fi:
+end:
+##################################################################################################################
+#KOH(n,k,q): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k).
+#Uses the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+KOH:=proc(n,k,q) local Total,part,d,i: option remember:
+	if n<0 or k<0 then
+		return(0):
+	elif n=0 or k=0 then
+		return(1):
+	elif k=1 then
+		return(add(q^i,i=0..n)):
+	fi:
+	Total:=0:
+	for part in partition(k) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+#The parts of what are added:
+#		qExponent:=k*(nops(part)-1)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1):
+#		GnkProduct:=mul(KOH((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1),d[k-i],q),i=0..k-1):
+#		Total:=Total+q^qExponent*GnkProduct:
+		Total:=Total+q^(k*(nops(part)-1)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*mul(KOH((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1),d[k-i],q),i=0..k-1):
+	od:
+	expand(normal(Total)):
+end:
+##################################################################################################################
+#KOHa(n,k,q,a): Produces the q-binomial G(n,k)=[n+k,k]=mul((1-q^(n+i))/(1-q^i),i=1..k).
+#Also contains the symbolic a[partition] whenever the recursive call is made with a partition.
+#Uses the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+KOHa:=proc(n,k,q,a) local Total,part,d,i: option remember:
+	if n<0 or k<0 then
+		return(0):
+	elif n=0 or k=0 then
+		return(1):
+	elif k=1 then
+		return(add(q^i,i=0..n)):
+	fi:
+	Total:=0:
+	for part in partition(k) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+		Total:=Total+a[op(part)]*q^(k*(nops(part)-1)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*mul(KOHa((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1),d[k-i],q,a),i=0..k-1):
+	od:
+	expand(normal(Total)):
+end:
+##################################################################################################################
+#KOHdepth(n,k): Finds the maximum depth of recursive calls
+#using the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+KOHdepth:=proc(n,k) local maxDepth,part,d,i,tempDepth,tempMaxDepth: option remember:
+	if n<0 or k<0 then
+		return(-1):
+	elif n=0 or k=0 then
+		return(0):
+	elif k=1 then
+		return(0):
+	fi:
+	maxDepth:=0:
+	for part in partition(k) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+		tempMaxDepth:=0:
+		for i from 1 to k do
+			tempDepth:=KOHdepth(i*n-2*(k-i)+2*add((j-i)*d[j],j=i+1..k),d[i]):
+			if tempDepth=-1 then	#If n'<0 for some i, then either n'(1)<0 or n'(i')<0 for i' s.t. n=-2+2*add(j*d[j],j=i'+1..k). Occurs only if n<=2k-2.
+				break:	#The other recursive calls are never made.
+			elif tempDepth>tempMaxDepth then
+				tempMaxDepth:=tempDepth:
+			fi:
+		od:
+		if i=k+1 and tempMaxDepth>maxDepth then#Nothing broke out.
+			maxDepth:=tempMaxDepth:
+		fi:
+	od:
+	maxDepth+1:
+end:
+##########################################################
+#KOHdepthFAST(n,k): finds the maximum depth of recursive calls using the explicit formula found in the accompanying paper.
+KOHdepthFAST:=proc(n,k):
+	if n=0 or k<2 then
+		return(0):
+	elif k=3 then
+		return(ceil(n/4)):
+	elif (k mod 2=0 and n<=2) or (k mod 2=1 and n<=3) then
+		return(1):
+	else
+		return(ceil(floor(k/2)*n/2)-ceil(k/2)+1):
+	fi:
+end:
+##################################################################################################################
+#KOHcalls(n,k): Finds the total number of recursive calls
+#using the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+KOHcalls:=proc(n,k) local calls,part,d,i,tempCalls,tCalls: option remember:
+#This may be considered an overestimate as it assumes every recursive call is made whether or not another value of i for a given partition yields 0.
+#	if n<0 or k<0 then
+#		return(0):
+#	elif n=0 or k=0 then
+#		return(0):
+#	elif k=1 then
+#		return(0):
+#	fi:
+#	add(k+add(KOHcalls((k-i)*n-2*i+2*add((i-j)*numboccur(part,k-j),j=0..i-1),numboccur(part,k-i)),i=0..k-1),part in partition(k)):
+#The below should be "exact" in the sense that if another value of i for a given partition yields 0, all calls in that partition are ignored.
+	if n<0 or k<0 then
+		return(-1):
+	elif n=0 or k=0 then
+		return(0):
+	elif k=1 then
+		return(0):
+	fi:
+	calls:=0:
+	for part in partition(k) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+		tempCalls:=0:
+		for i from 1 to k do
+			tCalls:=KOHdepth(i*n-2*(k-i)+2*add((j-i)*d[j],j=i+1..k),d[i]):
+			if tCalls =-1 then	#If n'<0 for some i, then either n'(1)<0 or n'(i')<0 for i' s.t. n=-2+2*add(j*d[j],j=i'+1..k). Occurs only if n<=2k-2.
+				break:	#The other recursive calls are never made.
+			else
+				tempCalls:=tempCalls+tCalls:
+			fi:
+		od:
+		if i=k+1 then#Nothing broke out.
+			calls:=calls+tempCalls:
+		fi:
+	od:
+	calls+1:
+end:
+
+
+##################################################################################################################
+#KOHgeneral(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1): Produces symmetric and unimodal polynomials.
+#Uses a modified version of the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+#PP=Partition Parameters:
+#pp1=integer: restricts to partitions with minimum integer >=pp1. pp1 should be in [1,k].
+#pp2=integer: restricts to partitions with maximum integer <=pp2. pp2 should be in [1,k].
+#pp3=integer: restricts to partitions with minimum size >=pp3. pp3 should be in [0,k].
+#pp4=integer: restricts to partitions with maximum size <=pp4. pp4 should be in [1,k].
+#pp5=integer: restricts to partitions with parts at least distance >=pp5.
+#pp6=set: elements are pairs [a,b] such that each part of a partition is =a mod b for some [a,b] in pp6.
+#RP=Recursive Parameters:
+#rp1,rp2,rp3: Multiplies each addition by a certain factor of q and modifies the recursed KOHgeneral s.t. we maintain darga(KOHgeneral(n,k,q,parameters))=n*k.
+#rp1,rp2,rp3 should be >=0.
+#CP=Constant Parameters:
+#cp1: Multiplies initial conditions by cp1. Makes more than a multiplicative difference because the recursive calls can compound differently.
+#cp2: Multiplies KOH by cp2. Makes more than a multiplicative difference because the recursive calls can compound differently.
+#cp1,cp2 appear to dictate the peak difference. After dividing out by cp1^k*cp2, the difference is? cp1*cp2. Need sign(cp1)=sign(cp2) otherwise the peak is actually a valley.
+#cp3 is an expression in the variable cp4. It multiples each addition by subs(cp4=nops(partition),cp3).
+#RT: is a table of values for each partition. The summand is multiplied by RT[partition]. If RT does not have partition as an index, it is treated as RT[partition]=1.
+KOHgeneral:=proc(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1) local Total,part,d,i: option remember:
+	if n<0 or k<0 then
+		return(0):
+	elif n=0 or k=0 then
+		return(CP[1]):
+	elif k=1 then #Needed otherwise you get self-referential calls in the recursive step if recursiveParams=[0,0,0].
+		return(CP[1]*add(q^i,i=0..n)):
+	fi:
+	Total:=0:
+	for part in generalPartitions(k,op(PP)) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+#Effects of different parameters on current addition:
+#rp1		Multiply by q^(k*rp1) and reduce n in KOHgeneral by 2*rp1*(k-i). I.e. call KOHgeneral("-2*rp1*(k-i),") instead of KOH general(",").
+#rp2		Multiply by q^(nops(part)*rp2) and reduce n in KOHgeneral by 2*rp2. I.e. call KOHgeneral("-2*rp2,") instead of KOH general(",").
+#rp3		Multiply by q^(rp3*(k*(k+1)*(n/2-rp1)-k*(k+2*rp2)+add(d[i]*i^2,i=1..k))) and reduce k in KOHgeneral by 2*rp3. I.e. KOHgeneral(","-2*rp3) instead of KOH general(",").
+#Constant powers of q were moved to the final line.
+		if type(RT[part],numeric) then
+			Total:=Total+RT[part]*subs(CP[4]=nops(part),CP[3])*q^((k+RP[2])*nops(part)+RP[3]*add(d[i]*i^2,i=1..k)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*mul(KOHgeneral((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1)-2*RP[1]*(k-i)-2*RP[2],d[k-i]-2*RP[3],q,PP,RP,CP,RT),i=0..k-1):
+		else
+			Total:=Total+subs(CP[4]=nops(part),CP[3])*q^((k+RP[2])*nops(part)+RP[3]*add(d[i]*i^2,i=1..k)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*mul(KOHgeneral((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1)-2*RP[1]*(k-i)-2*RP[2],d[k-i]-2*RP[3],q,PP,RP,CP,RT),i=0..k-1):
+		fi:
+	od:
+	expand(normal(CP[2]*Total*q^(k*(RP[1]-1)+RP[3]*(k*(k+1)*(n/2-RP[1])-k*(k+2*RP[2]))))):
+end:
+##################################################################################################################
+#KOHgeneralParsed(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,ijk],RT:=1): Produces symmetric and unimodal polynomials.
+#Is very forgiving in what parameters are fed into it.
+KOHgeneralParsed:=proc(n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,ijk],RT:=1) local nop,pParams,rParams,cParams,ijk:
+	if n=0 or k=0 then#Made separately so that parameters are not divided unnecessarily.
+		return(1):
+	elif k=1 then
+		return(add(q^i,i=0..n)):
+	fi:
+
+	nop:=nops(PP):
+	if not (is(PP,list) or (is(PP,integer) and PP>=0)) or nop=0 then
+		pParams:=[1,k,0,k,0,{}]:
+	elif nop=1 then
+		pParams:=[op(PP),k,0,k,0,{}]:
+	elif nop=2 then
+		pParams:=[op(PP),0,k,0,{}]:
+	elif nop=3 then
+		pParams:=[op(PP),k,0,{}]:
+	elif nop=4 then
+		pParams:=[op(PP),0,{}]:
+	elif nop=5 then
+		pParams:=[op(PP),{}]:
+	else
+		pParams:=PP[1..6]:
+	fi:
+
+	nop:=nops(RP):
+	if not (is(RP,list) or (is(RP,integer) and RP>=0)) or nop=0 then
+		rParams:=[0,0,0]:
+	elif nop=1 then
+		rParams:=[op(RP),0,0]:
+	elif nop=2 then
+		rParams:=[op(RP),0]:
+	else
+		rParams:=RP[1..3]:
+	fi:
+
+	nop:=nops(CP):
+	if not (is(CP,list) or (is(CP,integer) and CP>=0)) or nop=0 then
+		cParams:=[1,1,1,ijk]:
+	elif nop=1 then
+		cParams:=[op(CP),1,1,ijk]:
+	elif nop=2 then
+		cParams:=[op(CP),1,ijk]:
+	elif nop=3 then
+		cParams:=[op(CP),ijk]:
+	elif not is(CP[4],symbol) then
+		return(`The 4th constant parameter (cp4) must be a symbol in the expression of cp3. If cp3 is constant w.r.t. cp4, you can multiply cp3 into cp2.`):
+	else
+		cParams:=CP[1..4]:
+	fi:
+
+	#The following reduces the polynomial by known powers of q (should not do this to maintain darga=n*k) and constant factors that would appear.
+	expand(normal(KOHgeneral(n,k,q,pParams,rParams,cParams,RT)/(cParams[1]^k*cParams[2]))):#*q^(k*rParams[1]+rParams[2])))):
+end:
+
+##################################################################################################################
+#KOHrecurse(GNK,n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1): Returns what the recursive call would be for KOHgeneral(n,k,q,PP,RP,CP,RT).
+KOHrecurse:=proc(GNK,n,k,q,PP:=[1,k,0,k,0,{}],RP:=[0,0,0],CP:=[1,1,1,i],RT:=1) local Total,totalPart,part,d,i,newN,newK:
+	if k<0 or (is(n,integer) and n<0) then
+		return(0):
+	elif k=0 or (is(n,integer) and n=0) then
+		return(CP[1]):
+	fi:
+	Total:=0:
+	for part in generalPartitions(k,op(PP)) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+		totalPart:=1:
+		for i from 0 to k-1 do
+			newN:=(k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1)-2*RP[1]*(k-i)-2*RP[2]:
+			newK:=d[k-i]-2*RP[3]:
+			if newK<0 or (is(newN,integer) and newN<0) then
+				totalPart:=0:
+				break:
+			elif newK=0 or (is(newN,integer) and newN=0) then
+				totalPart:=totalPart*CP[1]:
+			else
+				totalPart:=totalPart*GNK(newN,newK,q):
+			fi:
+		od:
+		if type(RT[part],numeric) then
+			Total:=Total+RT[part]*subs(CP[4]=nops(part),CP[3])*q^((k+RP[2])*nops(part)+RP[3]*add(d[i]*i^2,i=1..k)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*totalPart:
+		else
+			Total:=Total+subs(CP[4]=nops(part),CP[3])*q^((k+RP[2])*nops(part)+RP[3]*add(d[i]*i^2,i=1..k)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*totalPart:
+		fi:
+	od:
+	expand(normal(CP[2]*Total*q^(k*(RP[1]-1)+RP[3]*(k*(k+1)*(n/2-RP[1])-k*(k+2*RP[2]))))):
+end:
+
+
+##################################################################################################################
+#KOHrand(n,k,q,N): Produces a "random" symmetric and unimodal polynomial of darga n*k.
+#n,k are integers.
+#q is a variable
+#N is a nonnegative integer used to make the polynomial "random".
+#Uses a modified version of the combinatorial recurrence by Kathy O'Hara that was translated into algebraic form by Dr. Zeilberger.
+KOHrand:=proc(n,k,q,N) local Total,part,d,i:
+	if n<0 or k<0 then
+		return(0):
+	elif n=0 or k=0 then
+		return(1):
+	elif k=1 then
+		return(add(q^i,i=0..n)):
+	fi:
+	Total:=0:
+	for part in partition(k) do
+		d:=[0$k]:
+		for i from 1 to nops(part) do
+			d[part[i]]:=d[part[i]]+1:
+		od:
+		Total:=Total+rand(0..N)()*q^(k*(nops(part)-1)-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*mul(KOHrand((k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1),d[k-i],q,N),i=0..k-1):
+	od:
+	expand(normal(Total)):
+end:
+##################################################################################################################
+#RandomTheorem(n,q,K,L:=1,complicated:=false): Produces a list of symmetric and unimodal polynomials in q^n by adjusting the recursive call of KOH.
+#n,q are variables
+#K is the number of polynomials you wish to produce.
+#L,l are positive integers used to make the polynomials "random".
+#You can further complicate the polynomials by setting complicated=true. This requires solving a recurrence relation which may introduce imaginary coefficients.
+RandomTheorem:=proc(n,q,K,L:=1,l:=1,complicated:=false) local ra,P,k,part,d,i,totalPart:
+	ra:=rand(l..L):
+	if complicated then
+		P[1]:=ra()*(1-q^(n+1))/(1-q):
+	else
+		P[1]:=(1-q^(n+1))/(1-q):	#You would just be multiplying everything by the first ra().
+	fi:
+	for k from 2 to K do
+		P[k]:=0:
+		for part in generalPartitions(k,1,k,1,k-1) do#Removing the recursive call that would occur with the [1^k] partition.
+			d:=[0$k]:
+			for i from 1 to nops(part) do
+				d[part[i]]:=d[part[i]]+1:
+			od:
+			totalPart:=1:
+			for i from 0 to k-1 do
+				if d[k-i]>0 then
+					totalPart:=totalPart*subs(n=(k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1),P[d[k-i]]):
+				fi:
+			od:
+			P[k]:=P[k]+ra()*q^(k*nops(part)-k-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1))*totalPart:
+		od:
+		if complicated then#Now include the [1^k] recursive call.
+			P[k]:=rsolve({Pk(n)=Pk(n-2*(k-1))*q^(k*(k-1))+P[k],seq(Pk(i)=ra()*(1-q^(i*k+1))/(1-q),i=0..2*k-3)},Pk(n)):
+		fi:
+	od:
+	[seq(simplify(normal(P[k])),k=1..K)]:
+end:
+##################################################################################################################
+#RandomTheoremAndProof(n,q,K,L:=1,complicated:=false): Produces a list of symmetric and unimodal polynomials in q^n by adjusting the recursive call of KOH.
+#n,q are variables
+#K is the number of polynomials you wish to produce.
+#L,l are positive integers used to make the polynomials "random".
+#You can further complicate the polynomials by setting complicated=true. This requires solving a recurrence relation which may introduce imaginary coefficients.
+#It also produces a proof consisting of a recursive equation for each polynomial. Then simply use the observations of darga (and induction if complicated=true) to finish the proof.
+RandomTheoremAndProof:=proc(n,q,K,L:=1,l:=1,complicated:=false) local ra,PP,P,EE,k,part,d,i,totalPart,etotalPart,newN,randomNum,bound:
+	ra:=rand(l..L):
+	if complicated then
+		randomNum:=ra():
+		PP[1]:=randomNum*(1-q^(n+1))/(1-q):
+		EE[1]:=P(n,1)=randomNum*Sum(q^i,i=0..n):
+	else
+		PP[1]:=(1-q^(n+1))/(1-q):	#You would just be multiplying everything by the first ra().
+		EE[1]:=P(n,1)=Sum(q^i,i=0..n):
+	fi:
+	for k from 2 to K do
+		PP[k]:=0:
+		EE[k]:=0:
+		for part in generalPartitions(k,1,k,1,k-1) do#Removing the recursive call that would occur with the [1^k] partition.
+			d:=[0$k]:
+			for i from 1 to nops(part) do
+				d[part[i]]:=d[part[i]]+1:
+			od:
+			totalPart:=1:
+			etotalPart:=1:
+			for i from 0 to k-1 do
+				if d[k-i]>0 then
+					newN:=(k-i)*n-2*i+2*add((i-j)*d[k-j],j=0..i-1):
+					totalPart:=totalPart*subs(n=newN,PP[d[k-i]]):
+					etotalPart:=etotalPart*P(newN,d[k-i]):
+				fi:
+			od:
+			randomNum:=ra()*q^(k*nops(part)-k-add(add((j-i)*d[i]*d[j],j=i+1..k),i=1..k-1)):
+			PP[k]:=PP[k]+randomNum*totalPart:
+			EE[k]:=EE[k]+randomNum*etotalPart:
+		od:
+		if complicated then
+			PP[k]:=rsolve({Pk(n)=Pk(n-2*(k-1))*q^(k*(k-1))+PP[k],seq(Pk(i)=(1-q^(i*k+1))/(1-q),i=0..2*k-3)},Pk(n)):
+			EE[k]:=P(n,k)=q^(k*(k-1))*P(n-2*(k-1),k)+EE[k]:
+		else
+			EE[k]:=P(n,k)=EE[k]:
+		fi:
+	od:
+
+	print(P(n,1)=PP[1]):	#Separating the first polynomial to remove an extra line produced at the end. And unnecessary wording.
+	print(`is a unimodal polynomial because`):
+	print(EE[1]):
+	print():
+	lprint(P(n,1)=PP[1]):
+	printf("is a unimodal polynomial because\n"):
+	lprint(EE[1]):
+	if complicated then
+		for k from 2 to K do
+			bound:=2*k-2:
+			PP[k]:=simplify(normal(PP[k])):
+			PP[k]:=sort(factor(expand(numer(PP[k]))),order=plex(q^n,(-q)^n,q))/denom(PP[k]):	#(-q) shows up often.
+			print():
+#			print(cat(P(n,k)=PP[k] ,` is a unimodal polynomial for n>=0 because `, EE[k],` for n>=`,bound)):	#An alternate output format with polynomial/proof on the same line.
+			print(P(n,k)=PP[k]):
+			print(cat(`is a unimodal polynomial for n>=0 because (for n>=`,bound,`)`)):
+			print(EE[k]):
+			print():
+#			printf("%a is a unimodal polynomial for n>=0 because %a for n>=%a\n",P(n,k)=PP[k],EE[k],bound):
+			lprint(P(n,k)=PP[k]):
+			printf("is a unimodal polynomial for n>=0 because (for n>=%a)\n",bound):
+			lprint(EE[k]):
+		od:
+		print(`Check the finite number of missed cases by hand (or computer).`):
+	else
+		for k from 2 to K do
+			bound:=2*k-4:
+			PP[k]:=simplify(normal(PP[k])):
+			PP[k]:=sort(factor(expand(numer(PP[k]))),order=plex(q^n,q))/denom(PP[k]):
+			print():
+#			print(cat(P(n,k)=PP[k] ,` is a unimodal polynomial for n>=`,bound,` (and possibly more) because `, EE[k])):	#An alternate output format with polynomial/proof on the same line.
+			print(P(n,k)=PP[k]):
+			print(cat(`is a unimodal polynomial for n>=`,bound,` (and possibly more) because`)):
+			print(EE[k]):
+			print():
+#			printf("%a is a unimodal polynomial for n>=%a (and possibly more) because %a\n",P(n,k)=PP[k],bound,EE[k]):
+			lprint(P(n,k)=PP[k]):
+			printf("is a unimodal polynomial for n>=%a (and possibly more) because\n",bound):
+			lprint(EE[k]):
+		od:
+	fi:
+	return(PP,EE):
+end:
+
+
+##################################################################################################################
+#generalPartitions(n,minPart:=1,maxPart:=n,minSize:=0,maxSize:=n,minDistance:=0,congruences:={}): finds all of the partitions of n.
+#Subject to the constraints that each part is >=minPart and <=maxPart.
+#The size of the partition is >=minSize and <=maxSize.
+#congruences is a set of 2-element lists [a,b]. Each part must be =a mod b for some pair in congruences.
+#If congruences={}, then any number is valid.
+#Consecutive parts must have difference >=minDistance.
+#To obtain all partitions, call generalPartitions(n,1,n,1,n,0,{}) or generalPartitions(n).
+generalPartitions:=proc(n,minPart:=1,maxPart:=n,minSize:=0,maxSize:=n,minDistance:=0,congruences:={}) local minP,maxP,minS,maxS,minD,validNumbers,pair:
+#To make sure that everything is parsed properly.
+	minP:=max(1,minPart):
+	maxP:=min(n,maxPart):
+	minS:=max(0,minSize):
+	maxS:=min(n,maxSize):
+	if minP>maxP or minS>maxS then
+		return({}):
+	fi:
+
+	minD:=max(0,minDistance):
+	if congruences={} then
+		validNumbers:={seq(i,i=minP..maxP)}:
+	else
+		validNumbers:={}:
+		for pair in congruences do
+			validNumbers:=validNumbers union {seq(pair[1]+i*pair[2],i=ceil((minP-pair[1])/pair[2])..floor((maxP-pair[1])/pair[2]))}:
+		od:
+	fi:
+	genPartitions(n,[op(validNumbers)],minS,maxS,minD):
+end:
+##################################################################################################################
+#genPartitions(n,validNumbers,minS,maxS,minD): finds all partitions of n.
+#Subject to each part being in validNumbers, minS<=size<=maxS and consecutive parts differing by >=minD.
+#Assumed that n>= all members of validNumbers.
+genPartitions:=proc(n,validNumbers,minS,maxS,minD) local P,i,part,maxValid,j: option remember:
+	if n=0 then
+		if minS=0 then
+			return({[]}):
+		else
+			return({}):
+		fi:
+	elif maxS=1 then
+		if member(n,validNumbers) then
+			return({[n]}):
+		else
+			return({}):
+		fi:
+	fi:
+	P:={}:
+	for i from 1 to nops(validNumbers) do
+		part:=validNumbers[i]:
+		maxValid:=min(part-minD,n-part):
+		j:=i:
+		while j>0 and validNumbers[j]>maxValid do
+			j:=j-1:
+		od:
+		P:=P union {seq([part,op(parts)],parts in genPartitions(n-part,validNumbers[1..j],max(0,minS-1),maxS-1,minD))}:
+	od:
+	P:
+end:
+
+
+
+
+
+
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+#Created: March, 2017.
+#Written by Doron Zeilberger, Rutgers University.
+#2D generalizations added by Bryan Ek, Rutgers University.
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+
+ezra:=proc()
+	if args=NULL then
+		print(`The main procedures are: qFR, qF2DR, qF2DRC, SumSeq, SumSeqBi.`):
+		print(`The supporting procedures are: qbin, qfac, qFR1, qF2DR1.`):
+		print(`Procedures for guessing a polynomial in q^n are GPq, GPq1, GPq2.`):
+		print(`For help with a specific procedure, type ezra(function).`):
+
+	elif nops([args])=1 and op(1,[args])=qbin then
+		print(`qbin(a1,b1,q): the q-binomial  coefficient for numeric a1 and b1. Try:`):
+		print(` qbin(6,3,q); `):
+
+	elif nops([args])=1 and op(1,[args])=qfac then
+		print(`qfac(n1,q): (1-q)*...*(1-q^n1)/(1-q)^n1. Try:`):
+		print(`qfac(5,q);`):
+
+	elif nops([args])=1 and op(1,[args])=qFR then
+		print(`qFR(L,q,n,N,C): inputs a list L of polynomials (or rational functions) in q, and non-negative integers`):
+		print(` tries to find an operator ope(q,q^n,N) of degree deg1 and order ord1 such that deg1+ord1<=C`):
+		print(`annihilating L. or returns FAIL. L must be at least of length (C+3)^2/4+4.  Try`):
+		print(`qFR([seq(q^(i1^2),i1=1..15)],q,n,N,3);`):
+
+	elif nops([args])=1 and op(1,[args])=qFR1 then
+		print(`qFR1(L,deg1,ord1,q,n,N): inputs a list L of polynomials (or rational functions) in q, and non-negative integers`):
+		print(`deg1 and ord1 tries to find an operator ope(q,q^n,N) annihilating L. Try:`):
+		print(` qFR1([seq(q^(i1^2),i1=1..20)],2,1,q,n,N); `):
+
+	elif nops([args])=1 and op(1,[args])=SumSeq then
+		print(`SumSeq(F,N0): inputs  a summand F phrased in terms of the qbinomial coefficients (called qbin), or q-factorial (called qfac),  that`):
+		print(`depends on k and n, outputs the first N0 terms (starting at n=1) of the Sum(F,k=0..n). Try: `):
+		print(`SumSeq((n,k)->q^(k*(k-1)/2)*qbin(n,k,q),10); `):
+		print(`SumSeq((n,k)->q^(k^2)/qfac(k,q)/qfac(n-k,q),10); `):
+
+	elif nops([args])=1 and op(1,[args])=SumSeqBi then
+		print(`SumSeqBi(F,N0): inputs  a summand F phrased in terms of the qbinomial coefficients (called qbin) or q-factorial (called qfac) that`):
+		print(`depends on k and n, outputs the first N0 terms (starting at n=1) of the Sum(F,k=-n..n). Try: `):
+		print(`SumSeqBi((n,k)->(-1)^k*q^((5*k^2+k)/2)/qfac(n-k,q)/qfac(n+k,q),10);`):
+
+	elif nops([args])=1 and op(1,[args])=qF2DR then
+		print(`qF2DR(L,q,n,N,Cn,k,K,Ck): inputs a list L of polynomials (or rational functions) in q, and non-negative integers.`):
+		print(`Tries to find an operator ope(q,q^n,N) of degree degn,degk and order ordn,ordk such that degn+ordn<=Cn, degk+ordk<=Ck`):
+		print(`annihilating L. or returns FAIL. L must be at least of length (Cn+3)^2/4+4 by (Ck+3)^2/4+4.`):
+		print(`Try qF2DR([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,3,k,K,3).`):
+
+	elif nops([args])=1 and op(1,[args])=qF2DRC then
+		print(`qF2DRC(L,q,n,N,k,K,C): inputs a list L of polynomials (or rational functions) in q, and non-negative integers.`):
+		print(`Tries to find an operator ope(q,q^n,N) of degree degn,degk and order ordn,ordk such that degn+ordn+degk+ordk<=C`):
+		print(`annihilating L. or returns FAIL. L must be at least of length (C+2)^2/4+4 by (C+2)^2/4+4.`):
+		print(`Try qF2DRC([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,k,K,4).`):
+
+	elif nops([args])=1 and op(1,[args])=qF2DR1 then
+		print(`qF2DR1(L,q,n,N,degn,ordn,k,K,degk,ordk): inputs a 2D list L of polynomials (or rational functions) in q, and non-negative integers`):
+		print(`degn,ordn,degk,ordk and tries to find an operator ope(q,q^n,N,q^k,K) annihilating L. Try`):
+		print(`qF2DR1([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,1,1,k,K,2,1);`):
+
+	elif nops([args])=1 and op(1,[args])=GPq1 then
+		print(`GPq1(L,q,n,d1): Guesses a polynomial of degree d1 in q^n for L[n]. L is a 1D list of polynomials in q. Try`):
+		print(`GPq1([seq(q^n1,n1=1..20)],q,n,1);`):
+
+	elif nops([args])=1 and op(1,[args])=GPq2 then
+		print(`GPq2(L,q,n,d1): Guesses a polynomial of degree d1 in q^n for L[n]. L is a list of pairs of indices and polynomials in q. Try`):
+		print(`GPq2([seq([n1,q^n1],n1=1..20)],q,n,1);`):
+
+	elif nops([args])=1 and op(1,[args])=GPq then
+		print(`GPq(L,q,n,d1): Guesses a polynomial of degree <=d1 in q^n for L[n]. Try`):
+		print(`GPq([seq([n1,q^n1],n1=1..20)],q,n,1);`):
+
+	else
+		print(cat(`There is no ezra for `,args)):
+	fi:
+end:
+
+############################################################################################################################################
+#qfac(n1,q): (1-q)*...*(1-q^n1)/(1-q)^n1. Try:
+#qfac(5,q);
+qfac:=proc(n1,q) local i:
+	expand(normal(mul(1-q^i,i=1..n1)/(1-q)^n1)):
+end:
+
+#qbin(a1,b1,q): the q-binomial polynomial for numeric a1 and b1. try:
+#qbin(6,3,q);
+qbin:=proc(a1,b1,q)  local i:
+	expand(normal(mul((1-q^(a1-i+1))/(1-q^i),i=1..b1))):
+end:
+
+#SumSeq(F,N0): inputs  a summand F phrased in terms of the qbinomial coefficients (called qbin) or q-factorial (called qfac) that
+#depends on k and n, outputs the first N0 terms (starting at n=1) of the Sum(F,k=0..n). Try
+#SumSeq((n,k)->q^(k*(k-1)/2)*qbin(n,k,q),10);
+SumSeq:=proc(F,N0) local n1,k1:
+	normal([seq(expand(add(F(n1,k1),k1=0..n1)),n1=1..N0)]):
+end:
+
+#SumSeqBi(F,N0): inputs  a summand F phrased in terms of the qbinomial coefficients (called qbin) or q-factorial (called qfac) that
+#depends on k and n, outputs the first N0 terms (starting at n=1) of the Sum(F,k=-n..n). Try
+#SumSeqBi((n,k)->(-1)^k*q^((5*k^2+k)/2)/qfac(n-k,q)/qfac(n+k,q),10);
+SumSeqBi:=proc(F,N0) local n1,k1:
+	normal([seq(expand(add(F(n1,k1),k1=-n1..n1)),n1=1..N0)]):
+end:
+
+
+############################################################################################################################################
+#qFR(L,q,n,N,C): inputs a list L of polynomials (or rational functions) in q, and non-negative integers
+# tries to find an operator ope(q,q^n,N) of degree deg1 and order ord1 such that deg1+ord1<=C
+#annihilating L. or returns FAIL. L must be at least of length (C+3)^2/4+4.  Try
+#qFR([seq(q^(i1^2),i1=1..10)],q,n,N,3);
+qFR:=proc(L,q,n,N,C) local ope, ord1,deg1:
+	print(`Trying to find recurrence.`):
+	if nops(L)< (C+3)^2/4+4 then
+		print(cat(`L must be at least of length`,  trunc((C+3)^2/4+4))):
+		RETURN(FAIL):
+	fi:
+	for ord1 from 1 to C do
+		for deg1 from 0 to C-ord1 do
+			ope:=qFR1(L,deg1,ord1,q,n,N):
+			if ope<>FAIL then
+				RETURN(ope):
+			fi:
+		od:
+	od:
+	FAIL:
+end:
+#################################################################################
+#qFR1(L,deg1,ord1,q,n,N): inputs a list L of polynomials (or rational functions) in q, and non-negative integers
+#deg1 and ord1 tries to find an operator ope(q,q^n,N) annihilating L. Try
+#qFR1([seq(q^(i1^2),i1=1..10)],1,2,q,n,N);
+qFR1:=proc(L,deg1,ord1,q,n,N) local a,ope,var,i,j,eq,eq1,hal,i1,n1,lu,hal1,lu1:
+	if nops(L)< (ord1+1)*(deg1+2)+3  then
+		print(cat(`The list is too short, it has `, nops(L), `terms but it should have at least`, (ord1+1)*(deg1+2)+3, `terms .`)):
+		RETURN(FAIL):
+	fi:
+
+	ope:=add(add(a[i,j]*((q^n)^i)*N^j,i=0..deg1),j=0..ord1):
+	var:={seq(seq(a[i,j],i=0..deg1),j=0..ord1)}:
+	eq:=expand({seq(add(subs(n=n1,coeff(ope,N,i1))*L[n1+i1],i1=0..ord1),n1=1..(ord1+1)*(deg1+1)+3  ) }):
+	eq1:=subs(q=2,eq):
+	hal:=solve(eq1,var):
+
+	if expand(subs(hal,ope))=0 then
+		RETURN(FAIL):
+	else
+		print(cat(`There is hope for a recurrence of order`, ord1, `and degree`, deg1)):
+	fi:
+
+	hal:=solve(eq,var):
+	if expand(subs(hal,ope))=0 then
+		RETURN(FAIL):
+	fi:
+
+	lu:={}:
+	for hal1 in hal do
+		if op(1,hal1)=op(2,hal1) then
+			lu:=lu union {op(1,hal1)}:
+		fi:
+	od:
+
+	if nops(lu)>1 then
+		print(`Non unique solution`):
+		RETURN({seq(coeff(ope,lu1,1),lu1 in lu)}):
+	fi:
+
+	ope:=subs(hal,ope):
+	ope:=subs({seq(lu1=1,lu1 in lu)},ope):
+	if normal(expand({seq(add(subs(n=n1,coeff(ope,N,i1))*L[n1+i1],i1=0..ord1),n1=(ord1+1)*(deg1+1)+3..nops(L)-ord1   ) }))<>{0}  then
+		print(cat(ope, `did not work out`)):
+		RETURN(FAIL):
+	fi:
+	add(factor(coeff(ope,N,i1))*N^i1,i1=0..ord1):
+end:
+
+
+############################################################################################################################################
+#qF2DR(L,q,n,N,Cn,k,K,Ck): inputs a list L of polynomials (or rational functions) in q, and non-negative integers
+#tries to find an operator ope(q,q^n,N) of degree degn,degk and order ordn,ordk such that degn+ordn<=Cn, degk+ordk<=Ck
+#annihilating L. or returns FAIL. L must be at least of length (Cn+3)^2/4+4 by (Ck+3)^2/4+4.
+#Try qF2DR([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,3,k,K,3);
+qF2DR:=proc(L,q,n,N,Cn,k,K,Ck) local ope,ordn,ordk,C1,C2:
+#	print(`Trying to find recurrence.`):
+	if nops(L)< (Cn+3)^2/4+4 or nops(L[1])<(Ck+3)^2/4+4 then
+		print(cat(`L must be at least of length`, trunc((Cn+3)^2/4+4),` by `, trunc((Ck+3)^2/4+4))):
+		RETURN(FAIL):
+	fi:
+	for C1 from 1 to Cn do
+		for ordn from 1 to C1 do
+			for C2 from 1 to Ck do
+				for ordk from 1 to C2 do
+					ope:=qF2DR1(L,q,n,N,C1-ordn,ordn,k,K,C2-ordk,ordk):
+					if ope<>FAIL then
+						RETURN(ope):
+					fi:
+				od:
+			od:
+		od:
+	od:
+	FAIL:
+end:
+#################################################################################
+#qF2DRC(L,q,n,N,k,K,C): inputs a list L of polynomials (or rational functions) in q, and non-negative integers
+# tries to find an operator ope(q,q^n,N) of degree degn,degk and order ordn,ordk such that degn+ordn+degk+ordk<=C
+#annihilating L. or returns FAIL. L must be at least of length (C+2)^2/4+4 by (C+2)^2/4+4.  Try
+#qF2DRC([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,k,K,4);
+qF2DRC:=proc(L,q,n,N,k,K,C) local ope,ordn,ordk,C1,C2,Cn:
+#	print(`Trying to find recurrence.`):
+	if nops(L)< (C+2)^2/4+4 or nops(L[1])<(C+2)^2/4+4 then
+		print(cat(`L must be at least of length`, trunc((C+2)^2/4+4),` by `, trunc((C+2)^2/4+4))):
+		RETURN(FAIL):
+	fi:
+	for C1 from 2 to C do
+		for Cn from 1 to C1-1 do
+			for ordn from 1 to Cn do
+				for ordk from 1 to (C1-Cn) do
+					ope:=qF2DR1(L,q,n,N,Cn-ordn,ordn,k,K,C1-Cn-ordk,ordk):
+					if ope<>FAIL then
+						RETURN(ope):
+					fi:
+				od:
+			od:
+		od:
+	od:
+	FAIL:
+end:
+#################################################################################
+#qF2DR1(L,q,n,N,degn,ordn,k,K,degk,ordk): inputs a 2D list L of polynomials (or rational functions) in q, and non-negative integers
+#degn,ordn,degk,ordk and tries to find an operator ope(q,q^n,N,q^k,K) annihilating L. Try
+#qF2DR1([seq([seq(q^(k1^2+n1^2),k1=1..10)],n1=1..10)],q,n,N,1,1,k,K,2,1);
+qF2DR1:=proc(L,q,n,N,degn,ordn,k,K,degk,ordk) local a,ope,var,i,j,eq,eq1,hal,i1,n1,lu,hal1,lu1:
+	if nops(L)< (ordn+1)*(degn+2)+3 or nops(L[1])<(ordk+1)*(degk+2)+3  then
+		print(cat(`The list is too short, it has `, nops(L), ` by `, nops(L[1]), `terms but it should have at least`, (ordn+1)*(degn+2)+3, ` by `, (ordk+1)*(degk+2)+3,` terms .`)):
+		RETURN(FAIL):
+	fi:
+
+	ope:=add(add(add(add(a[i,j,x,y]*(q^n)^i*(q^k)^x*N^j*K^y,i=0..degn),j=0..ordn),x=0..degk),y=0..ordk):
+	var:={seq(seq(seq(seq(a[i,j,x,y],i=0..degn),j=0..ordn),x=0..degk),y=0..ordk)}:
+	eq:=expand({seq(seq(add(add(subs({n=n1,k=k1},coeff(coeff(ope,N,i1),K,j1))*L[n1+i1][k1+j1],i1=0..ordn),j1=0..ordk),n1=1..(ordn+1)*(degn+1)+3),k1=1..(ordk+1)*(degk+1)+3)}):
+	eq1:=subs(q=2,eq):
+	hal:=solve(eq1,var):
+
+	if expand(subs(hal,ope))=0 then #Making sure we do not have the trivial 0=0 recurrence.
+		RETURN(FAIL):
+	else
+		print(cat(`There is hope for a recurrence of order`, ordn,ordk, ` in n,k respectively. and degree`, degn,degk)):
+	fi:
+
+	hal:=solve(eq,var):
+	if expand(subs(hal,ope))=0 then #Making sure we do not have the trivial 0=0 recurrence.
+		RETURN(FAIL):
+	fi:
+	lu:={}:
+	for hal1 in hal do
+		if op(1,hal1)=op(2,hal1) then#Meaning the variable was not assigned to any value.
+			lu:=lu union {op(1,hal1)}:
+		fi:
+	od:
+
+	if nops(lu)>1 then
+		print(`Non unique solution`):
+		RETURN({seq(coeff(ope,lu1,1),lu1 in lu)}):
+	fi:
+	ope:=subs(hal,ope):
+	ope:=subs({lu[1]=1,seq(lu[i]=0,i=2..nops(lu))},ope):
+	if normal(expand({seq(seq(add(add(subs({n=n1,k=k1},coeff(coeff(ope,N,i1),K,j1))*L[n1+i1][k1+j1],i1=0..ordn),j1=0..ordk),n1=(ordn+1)*(degn+1)+4..nops(L)-ordn),k1=(ordk+1)*(degk+1)+4..nops(L[1])-ordk)}))<>{0}  then
+		print(cat(ope, `did not work out.`)):
+		RETURN(FAIL):
+	fi:
+	add(add(factor(coeff(coeff(ope,N,i1),K,j1))*N^i1*K^j1,i1=0..ordn),j1=0..ordk):#Trying to factor each coefficient.
+end:
+
+
+
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+#Programs to guess a polynomial of degree d1 in q^n for a list.
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+###############################################################################################################################################################################
+#GPq1(L,q,n,d1): Guesses a polynomial of degree d1 in q^n for L[n]. Try
+#GPq1([seq(q^n1,n1=1..20)],q,n,1);
+GPq1:=proc(L,q,n,d1) local eq,var,a,P,eq1,i1,x,n1:
+	var:={seq(a[i1],i1=0..d1)}:
+	P:=add(a[i1]*x^i1,i1=0..d1):
+	if nops(L)<d1+3 then
+		RETURN(FAIL):
+	fi:
+
+	eq:={seq(subs(x=q^n1,P)-L[n1],n1=1..d1+2)}:
+	eq1:=subs(q=3,eq):
+	if solve(eq1,var)=NULL then
+		RETURN(FAIL):
+	fi:
+	var:=solve(eq,var):
+	P:=subs(var,P):
+
+	if normal(expand({seq(subs(x=q^n1,P)-L[n1],n1=d1+3..nops(L))}))<>{0} then
+		print(P, `did not work out`):
+		RETURM(FAIL):
+	fi:
+	P:=factor(P):
+	subs(x=q^n,P):
+end:
+
+#GPq2(L,q,n,d1): Guesses a polynomial of degree d1 in q^n for L[n].
+#L is a list of pairs [input,output].
+GPq2:=proc(L,q,n,d1) local eq,var,a,P,eq1,i1,x,n1:
+	var:={seq(a[i1],i1=0..d1)}:
+	P:=add(a[i1]*x^i1,i1=0..d1):
+	if nops(L)<d1+3 then
+		RETURN(FAIL):
+	fi:
+
+	eq:={seq(subs(x=q^L[n1][1],P)-L[n1][2],n1=1..d1+2)}:
+	eq1:=subs(q=3,eq):
+	if solve(eq1,var)=NULL then
+		RETURN(FAIL):
+	fi:
+	var:=solve(eq,var):
+	P:=subs(var,P):
+
+	if normal(expand({seq(subs(x=q^L[n1][1],P)-L[n1][2],n1=d1+3..nops(L))}))<>{0} then
+		print(cat(P, `did not work out.`)):
+		RETURM(FAIL):
+	fi:
+	P:=factor(P):
+	subs(x=q^n,P):
+end:
+
+#GPq(L,q,n,d1): Guesses a polynomial of degree <=d1 in q^n for L[n]. Try
+#GPq([seq([n1,q^n1],n1=1..20)],q,n,1);
+GPq:=proc(L,q,n,d1) local d11,gu:
+	if nops(L)<d1+3 then
+		print(`List too short`):
+		RETURN(FAIL):
+	fi:
+	for d11 from 1 to d1 do
+		gu:=GPq2(L,q,n,d11):
+		if gu<>FAIL then
+			RETURN(gu):
+		fi:
+	od:
+	FAIL:
+end:
